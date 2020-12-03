@@ -6,36 +6,33 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GuildedRose.API.Store.Models;
+using GuildedRose.API.Store.Interfaces;
 
 namespace GuildedRose.API.Store.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class Store : ControllerBase
+    public class StoreController : ControllerBase
     {
-        private readonly StoreItemContext _context;
+        private readonly IStoreRepository _context;
 
-        public Store(StoreItemContext context)
+        public StoreController(IStoreRepository context)
         {
             _context = context;
-
-            if (_context.Items.Any()) return;
-
-            StoreItemSeed.InitializeData(context);
         }
 
         // GET: api/Store
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StoreItem>>> GetItems()
         {
-            return await _context.Items.ToListAsync();
+            return await _context.GetItems();
         }
 
         // GET: api/Store/5
         [HttpGet("{id}")]
         public async Task<ActionResult<StoreItem>> GetStoreItem(string id)
         {
-            var storeItem = await _context.Items.FindAsync(id);
+            var storeItem = await _context.GetStoreItem(id);
 
             if (storeItem == null)
             {
@@ -113,11 +110,6 @@ namespace GuildedRose.API.Store.Controllers
             //await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool StoreItemExists(string id)
-        {
-            return _context.Items.Any(e => e.Id == id);
         }
     }
 }
